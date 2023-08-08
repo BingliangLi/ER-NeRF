@@ -77,6 +77,10 @@ args = parser.parse_args()
 wav_16k_name = args.wav
 speech_16k, _ = sf.read(wav_16k_name)
 
-hubert_hidden = get_hubert_from_16k_speech(speech_16k).reshape(-1, 2, 1024)
+hubert_hidden = get_hubert_from_16k_speech(speech_16k)
+# padding so can be reshaped
+if hubert_hidden.shape[0] % 2 != 0:
+    hubert_hidden = torch.nn.functional.pad(hubert_hidden, (0,0,0,1)) 
+hubert_hidden = hubert_hidden.reshape(-1, 2, 1024)
 np.save(wav_16k_name.replace('.wav', '_hu.npy'), hubert_hidden.detach().numpy())
 print(hubert_hidden.detach().numpy().shape)
